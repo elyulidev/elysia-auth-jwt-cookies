@@ -1,0 +1,57 @@
+# tests/auth.http
+# ⚠️ PASSO 0 — Habilitar o Cookie Jar no VS Code ANTES de testar:
+# Abra Settings (Ctrl+,) e busque: rest-client.cookieJarEnabled
+# Marque a opção como true  (ou adicione em settings.json):
+# "rest-client.cookieJarEnabled": true
+
+@baseUrl = http://localhost:3000
+
+### 1 — Sign Up
+# O servidor responde com Set-Cookie: access_token + refresh_token
+# O Rest Client armazena os cookies automaticamente no Cookie Jar
+POST {{baseUrl}}/auth/sign-up
+Content-Type: application/json
+
+{
+  "email": "aluno@test.com",
+  "password": "senha123456"
+}
+
+###
+
+### 2 — Sign In
+# Re-autentica e renova os cookies no Cookie Jar
+POST {{baseUrl}}/auth/sign-in
+Content-Type: application/json
+
+{
+  "email": "aluno@test.com",
+  "password": "senha123456"
+}
+
+###
+
+### 3 — Perfil (rota protegida)
+# Não é necessário nenhum header manual!
+# O Cookie Jar envia 'access_token' automaticamente.
+GET {{baseUrl}}/users/me
+
+###
+
+### 4 — Refresh Token com Rotação
+# O Cookie Jar envia 'refresh_token' automaticamente (path=/auth/refresh coincide).
+# O servidor invalida o par antigo e responde com novos Set-Cookie.
+POST {{baseUrl}}/auth/refresh
+
+###
+
+### 5 — Logout
+# O servidor apaga os cookies via Set-Cookie: token=; Max-Age=0
+# O Cookie Jar remove os cookies locais.
+POST {{baseUrl}}/auth/logout
+
+###
+
+### 6 — Tentativa pós-logout (deve retornar 401)
+# Cookie Jar está vazio — nenhum token é enviado.
+GET {{baseUrl}}/users/me
