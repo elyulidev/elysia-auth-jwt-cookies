@@ -8,6 +8,20 @@
       "when": 1776428425651,
       "tag": "0000_colorful_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779875028320,
+      "tag": "0001_good_crystal",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779875370736,
+      "tag": "0002_fuzzy_squadron_sinister",
+      "breakpoints": true
     }
   ]
 }
