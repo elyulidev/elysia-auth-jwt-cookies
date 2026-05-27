@@ -1,5 +1,6 @@
 // src/index.ts
 
+import cors from "@elysia/cors";
 import { openapi } from "@elysiajs/openapi";
 import { Elysia } from "elysia";
 import { signInRoute, signUpRoute } from "./routes/auth.route";
@@ -7,7 +8,8 @@ import { logoutRoute } from "./routes/logout.route";
 import { refreshRoute } from "./routes/refresh.route";
 import { userRoute } from "./routes/user.route";
 
-const app = new Elysia()
+const app = new Elysia({ prefix: "/api" })
+	.use(cors({ origin: ["http://127.0.0.1:3001"] }))
 	.use(
 		openapi({
 			documentation: {
