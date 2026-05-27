@@ -4,7 +4,7 @@
 # Marque a opção como true  (ou adicione em settings.json):
 # "rest-client.cookieJarEnabled": true
 
-@baseUrl = http://localhost:3000
+@baseUrl = http://localhost:3000/api
 
 ### 1 — Sign Up
 # O servidor responde com Set-Cookie: access_token + refresh_token
