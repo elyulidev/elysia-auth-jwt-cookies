@@ -6,12 +6,12 @@ import { dbPlugin } from "../db/client";
 import { accessJwt, refreshJwt } from "../plugins/jwt.plugin";
 import { hashPassword, verifyPassword } from "../utils/password";
 
-export const signUpRoute = new Elysia()
+export const signUpRoute = new Elysia({ prefix: "/auth" })
 	.use(dbPlugin)
 	.use(accessJwt)
 	.use(refreshJwt)
 	.post(
-		"/auth/sign-up",
+		"/sign-up",
 		async ({ body, db, models, accessJwt, refreshJwt, cookie, status }) => {
 			// 1. Verificar se o email já existe
 			const [existing] = await db
@@ -43,11 +43,17 @@ export const signUpRoute = new Elysia()
 			// 2 minutos
 			const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
 			//const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-			await db.insert(models.refreshToken).values({
-				userId: newUser.id,
-				token: refreshToken,
-				expiresAt,
-			});
+			await db
+				.insert(models.refreshToken)
+				.values({
+					userId: newUser.id,
+					token: refreshToken,
+					expiresAt,
+				})
+				.onConflictDoUpdate({
+					target: [models.refreshToken.userId],
+					set: { token: refreshToken, expiresAt },
+				});
 
 			// 6. Entregar os tokens em cookies HttpOnly — JS no browser NÃO consegue lê-los
 			cookie.access_token.set({
@@ -96,12 +102,12 @@ export const signUpRoute = new Elysia()
 		},
 	);
 
-export const signInRoute = new Elysia()
+export const signInRoute = new Elysia({ prefix: "/auth" })
 	.use(dbPlugin)
 	.use(accessJwt)
 	.use(refreshJwt)
 	.post(
-		"/auth/sign-in",
+		"/sign-in",
 		async ({ body, db, models, accessJwt, refreshJwt, cookie, status }) => {
 			// 1. Buscar o usuário pelo email
 			const [user] = await db
@@ -128,11 +134,17 @@ export const signInRoute = new Elysia()
 			// 4. Persistir o refresh token
 			const expiresAt = new Date(Date.now() + 2 * 60 * 1000); //minutos
 			//const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-			await db.insert(models.refreshToken).values({
-				userId: user.id,
-				token: refreshToken,
-				expiresAt,
-			});
+			await db
+				.insert(models.refreshToken)
+				.values({
+					userId: user.id,
+					token: refreshToken,
+					expiresAt,
+				})
+				.onConflictDoUpdate({
+					target: [models.refreshToken.userId],
+					set: { token: refreshToken, expiresAt },
+				});
 
 			// 5. Definir cookies HttpOnly — inacessíveis ao JavaScript do browser
 			cookie.access_token.set({
